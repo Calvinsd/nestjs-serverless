@@ -1,0 +1,67 @@
+# Service name
+service: ${file(./package.json):name}
+ 
+frameworkVersion: '3'
+
+# Lambda functions
+functions:
+  - ${file(src/main-rest-lambda.yml)}
+  - ${file(src/ws-handler/ws-handler.yml)}
+
+custom:
+  defaults:
+    stage: local
+    region: ap-south-1
+    runtime: nodejs18.x
+    timeout: 30
+    memorySize: 256
+    logRetentionInDays: 1
+
+  tags:
+    Name: ${file(./package.json):name}
+
+  # serverless offline config
+  serverless-offline:
+    httpPort: 9000
+    noPrependStageInUrl: true
+    webSocketIdleTimeout: 180
+    websocketPort: 9001
+
+provider:
+  name: aws
+  runtime: ${self:custom.defaults.runtime}
+  stage: ${opt:stage, self:custom.defaults.stage}
+  region: ${opt:region, self:custom.defaults.region}
+  timeout: ${self:custom.defaults.timeout}
+  memorySize: ${self:custom.defaults.memorySize}
+  tags: ${self:custom.tags}
+  websocketsApiName: nest-ws-api
+  websocketsApiRouteSelectionExpression: $request.body.route
+  websocketsDescription: Custom Serverless Websockets
+  apiGateway:
+    minimumCompressionSize: 0
+    shouldStartNameWithService: true
+    binaryMediaTypes:
+      - '*/*'
+      - 'image/*'
+      - 'text/html'
+      - 'application/octet-stream'
+      - 'multipart/form-data'
+  logRetentionInDays: ${self:custom.defaults.logRetentionInDays}
+  tracing:
+    apiGateway: true
+    lambda: true
+  # uncomment the below config to use an explicitly defined S3 bucket to store artifacts for deploying,
+  # serverless automatically creats a bucket and manages it.
+  # deploymentBucket:
+  #   name: ${file(./package.json):name}.bucket
+  #   serverSideEncryption: AES256
+  # deploymentPrefix: serverless
+  environment:
+    NODE_ENV: ${self:provider.stage}
+  
+plugins:
+  - serverless-offline
+
+package:
+  individually: true

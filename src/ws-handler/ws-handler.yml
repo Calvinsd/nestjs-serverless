@@ -1,0 +1,9 @@
+ws-handler:
+  handler: dist/ws-handler/ws-handler.handler
+  events:
+    - websocket:
+        route: $connect
+    - websocket:
+        route: $disconnect
+    - websocket:
+        route: $default
