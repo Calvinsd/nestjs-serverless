@@ -1,0 +1,17 @@
+name: Buil and test
+on:
+  - push
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Setup node v18
+        uses: actions/setup-node@master
+        with:
+          node-version: 18
+      - name: Install, build & test
+        run: npm install
+      - run: npm run build
+      - run: npm run test
+      - run: npm run test:e2e
